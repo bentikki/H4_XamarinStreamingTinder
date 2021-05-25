@@ -39,7 +39,7 @@ namespace StreaminTinderClassLibrary.Users.Handlers
 
             if (!httpResponse.IsSuccessStatusCode)
             {
-                throw new Exception("Cannot add a todo task");
+                throw new Exception("Cannot create a user");
             }
 
             var createdTask = JsonConvert.DeserializeObject<User>(await httpResponse.Content.ReadAsStringAsync());
@@ -49,7 +49,7 @@ namespace StreaminTinderClassLibrary.Users.Handlers
 
         public IUser Get(int id)
         {
-            IUser user = new User();
+            IUser user;
 
             string apiUrlParam = "users/" + id;
 
@@ -65,7 +65,15 @@ namespace StreaminTinderClassLibrary.Users.Handlers
 
             string apiUrlParam = $"users/{columnName}/{value}";
 
-            user = apiRequester.GetObjectFromApi<User>(apiUrlParam);
+            try
+            {
+                user = apiRequester.GetObjectFromApi<User>(apiUrlParam);
+            }
+            catch (Exception e)
+            {
+                user = null;
+            }
+
             return user;
         }
 
@@ -74,6 +82,45 @@ namespace StreaminTinderClassLibrary.Users.Handlers
             throw new NotImplementedException();
         }
 
+        public bool Delete(int id)
+        {
+            bool deletedSuccess;
 
+            string apiUrlParam = "users/delete/" + id;
+
+            deletedSuccess = apiRequester.GetObjectFromApi<bool>(apiUrlParam);
+
+            return deletedSuccess;
+        }
+
+        public bool VerifyUserLogin(IUser user)
+        {
+            ApiCreateUser apiUser = new ApiCreateUser();
+
+            apiUser.Email = user.Email;
+            apiUser.Password = user.Password;
+
+            bool userVerfied;
+            userVerfied = this.APIVerfiyUser(apiUser).Result;
+
+            return userVerfied;
+        }
+
+        private async Task<bool> APIVerfiyUser(ApiCreateUser apiUser)
+        {
+            var content = JsonConvert.SerializeObject(apiUser);
+            HttpClient _client = new HttpClient();
+
+            var httpResponse = await _client.PostAsync("https://localhost:44346/api/users/verify", new StringContent(content, Encoding.Default, "application/json"));
+
+            if (!httpResponse.IsSuccessStatusCode)
+            {
+                throw new Exception("An error occured. Cannot verfiy user");
+            }
+
+            var createdTask = JsonConvert.DeserializeObject<bool>(await httpResponse.Content.ReadAsStringAsync());
+            return createdTask;
+
+        }
     }
 }

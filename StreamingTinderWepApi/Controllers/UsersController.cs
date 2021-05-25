@@ -13,6 +13,7 @@ using Dapper.Contrib.Extensions;
 using StreamingTinderWepApi.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
+using StreaminTinderClassLibrary.Hashing;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -88,6 +89,75 @@ namespace StreamingTinderWepApi.Controllers
             newlyCreatedUser = _context.Users.FindAsync(createdUserId).Result;
 
             return newlyCreatedUser;
+        }
+
+        [HttpPost]
+        [Route("verify")]
+        public async Task<ActionResult<bool>> VerifyUser([FromBody] AuthUser authUser)
+        {
+            bool verifyUserSucceed;
+            AuthUser verifyUser = authUser;
+            AuthUser existingUser = new AuthUser();
+            HashingSettings settings = new HashingSettings(HashingMethodType.SHA256);
+            HashingService hashingService = new HashingService(settings);
+
+            var user = _context.Users.Where(x => x.Email == verifyUser.Email).FirstOrDefault();
+            if (user == null) return false;
+
+            
+            using (SqlConnection con = new SqlConnection("Data Source=MSI\\SQLExpress;Initial Catalog=StreamingTinder;Integrated Security=SSPI;"))
+            {
+                using (SqlCommand cmd = new SqlCommand("select * from AuthUsers WHERE Email = @Email", con))
+                {
+                    cmd.Parameters.AddWithValue("@Email", user.Email);
+                    con.Open();
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            existingUser.Email = reader["Email"].ToString();
+                            existingUser.Password = reader["Password"].ToString();
+                            existingUser.Salt = reader["Salt"].ToString();
+                        }
+                    }
+                }
+            }
+
+            // Run hashing compare
+            verifyUserSucceed = hashingService.VerifyPassword(verifyUser.Password, existingUser.Password, existingUser.Salt);
+
+
+
+            return verifyUserSucceed;
+        }
+
+
+        // GET: api/Users/Delete/5
+        [HttpGet("Delete/{id}")]
+        public async Task<ActionResult<bool>> Delete(int id)
+        {
+            var user = await _context.Users.FindAsync(id);
+
+            if (user != null)
+            {
+
+                using (SqlConnection con = new SqlConnection("Data Source=MSI\\SQLExpress;Initial Catalog=StreamingTinder;Integrated Security=SSPI;"))
+                {
+                    using (SqlCommand cmd = new SqlCommand("DeleteUser", con))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.Add("@ID", SqlDbType.Int).Value = user.Id;
+
+                        con.Open();
+                        cmd.ExecuteScalar();
+                    }
+                }
+
+                return true;
+            }
+            
+            return false;
         }
 
     }

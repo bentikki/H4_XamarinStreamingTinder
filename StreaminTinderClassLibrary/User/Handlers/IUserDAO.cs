@@ -10,5 +10,7 @@ namespace StreaminTinderClassLibrary.Users.Handlers
         IUser GetByString(string columnName, string value);
         IUser Create(IUser user);
         IUser Update(IUser user);
+        bool VerifyUserLogin(IUser user);
+        bool Delete(int id);
     }
 }

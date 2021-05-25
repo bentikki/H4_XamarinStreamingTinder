@@ -95,7 +95,7 @@ namespace StreaminTinderClassLibrary.Users
             if (string.IsNullOrEmpty(user.Password)) throw new ArgumentException("Password must not be null or empty", "Password");
 
             // Verify user be hashing service.
-            //userLoginSuccess = this._hashingService.VerifyPassword()
+            userLoginSuccess = this._userDAO.VerifyUserLogin(user);
 
             return userLoginSuccess;
         }
@@ -116,6 +116,24 @@ namespace StreaminTinderClassLibrary.Users
             selectedUser = this._userDAO.GetByString("email", email);
 
             return selectedUser;
+        }
+
+        /// <summary>
+        /// Returns user corrosponding to provided email string - if a user with corrosponding email exists.
+        /// </summary>
+        /// <param name="email">Email of needed user</param>
+        /// <returns>User with provided email</returns>
+        public bool DeleteUser(int id)
+        {
+            bool deletedUserSuccess = false;
+
+            // Verify checks
+            if (id <= 0) throw new ArgumentException("id must be above 0", "id");
+
+            // User object from DAO
+            deletedUserSuccess = this._userDAO.Delete(id);
+
+            return deletedUserSuccess;
         }
 
     }

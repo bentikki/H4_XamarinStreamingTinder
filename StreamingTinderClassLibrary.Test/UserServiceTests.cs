@@ -124,6 +124,81 @@ namespace StreamingTinderClassLibrary.Test
             Assert.Throws<ArgumentException>(() => this._userService.VerifyUser(user));
         }
 
+
+        [Test]
+        public void VerifyUser_MatchingUser_ShouldReturnTrue()
+        {
+            // Arrange
+            IUser createdUser;
+            IUser verifyUser;
+            bool verifySuccess = false;
+            Random random = new Random();
+            string password = "password" + random.Next(0, 100000);
+            string email = "testemail" + random.Next(0, 100000);
+
+            createdUser = new User()
+            {
+                Email = email,
+                Username = "testusername" + random.Next(0, 100000),
+                Password = password
+            };
+
+            // Act
+            createdUser = this._userService.CreateNewUser(createdUser);
+
+
+            verifyUser = new User()
+            {
+                Email = email,
+                Password = password
+            };
+
+            verifySuccess = this._userService.VerifyUser(verifyUser);
+
+            // Cleanup
+            this._userService.DeleteUser(createdUser.Id);
+
+            // Assert
+            Assert.IsTrue(verifySuccess);
+        }
+
+        [Test]
+        public void VerifyUser_NonMatchingUser_ShouldReturnFalse()
+        {
+            // Arrange
+            IUser createdUser;
+            IUser verifyUser;
+            bool verifySuccess = false;
+            Random random = new Random();
+            string password = "password" + random.Next(0, 100000);
+            string email = "testemail" + random.Next(0, 100000);
+
+            createdUser = new User()
+            {
+                Email = email,
+                Username = "testusername" + random.Next(0, 100000),
+                Password = password
+            };
+
+            // Act
+            createdUser = this._userService.CreateNewUser(createdUser);
+
+
+            verifyUser = new User()
+            {
+                Email = email,
+                Password = password + 1
+            };
+
+            verifySuccess = this._userService.VerifyUser(verifyUser);
+
+            // Cleanup
+            this._userService.DeleteUser(createdUser.Id);
+
+            // Assert
+            Assert.IsFalse(verifySuccess);
+        }
+
         [Test]
         [TestCase(null)]
         [TestCase("")]
@@ -134,6 +209,112 @@ namespace StreamingTinderClassLibrary.Test
 
             // Act and Assert
             Assert.Throws<ArgumentException>(() => this._userService.GetUserByEmail(emailString));
+        }
+
+        [Test]
+        public void GetUserByEmail_ExistingUser_ShouldReturnIUser()
+        {
+            // Arrange
+            IUser createdUser;
+            IUser retrievedUser;
+
+            Random random = new Random();
+
+            createdUser = new User()
+            {
+                Email = "testemail" + random.Next(0, 100000),
+                Username = "testusername" + random.Next(0, 100000),
+                Password = "password" + random.Next(0, 100000)
+            };
+
+            // Act
+            createdUser = this._userService.CreateNewUser(createdUser);
+            retrievedUser = this._userService.GetUserByEmail(createdUser.Email);
+
+            // Cleanup
+            this._userService.DeleteUser(createdUser.Id);
+            this._userService.DeleteUser(retrievedUser.Id);
+
+            // Act and Assert
+            Assert.NotNull(createdUser);
+            Assert.NotNull(retrievedUser);
+        }
+
+        [Test]
+        public void GetUserByEmail_NonExistingUser_ShouldReturnNull()
+        {
+            // Arrange
+            IUser createdUser;
+            IUser retrievedUser;
+
+            Random random = new Random();
+
+            createdUser = new User()
+            {
+                Email = "testemail" + random.Next(0, 100000),
+                Username = "testusername" + random.Next(0, 100000),
+                Password = "password" + random.Next(0, 100000)
+            };
+
+            // Act
+            createdUser = this._userService.CreateNewUser(createdUser); // Create new user
+            this._userService.DeleteUser(createdUser.Id); // Delete created user
+
+            retrievedUser = this._userService.GetUserByEmail(createdUser.Email);
+
+            // Act and Assert
+            Assert.IsNull(retrievedUser);
+        }
+
+        [Test]
+        public void DeleteUser_ExistingUser_ShouldReturnTrue()
+        {
+            // Arrange
+            IUser createdUser;
+            bool userDeletedSuccessfully;
+
+            Random random = new Random();
+
+            createdUser = new User()
+            {
+                Email = "testemail" + random.Next(0, 100000),
+                Username = "testusername" + random.Next(0, 100000),
+                Password = "password" + random.Next(0, 100000)
+            };
+
+
+            // Act
+            createdUser = this._userService.CreateNewUser(createdUser);
+            userDeletedSuccessfully = this._userService.DeleteUser(createdUser.Id);
+
+            // Act and Assert
+            Assert.IsTrue(userDeletedSuccessfully);
+        }
+
+        [Test]
+        public void DeleteUser_NonExistingUser_ShouldReturnFalse()
+        {
+            // Arrange
+            IUser createdUser;
+            bool userDeletedSuccessfully;
+
+            Random random = new Random();
+
+            createdUser = new User()
+            {
+                Email = "testemail" + random.Next(0, 100000),
+                Username = "testusername" + random.Next(0, 100000),
+                Password = "password" + random.Next(0, 100000)
+            };
+
+
+            // Act
+            createdUser = this._userService.CreateNewUser(createdUser);
+            this._userService.DeleteUser(createdUser.Id);
+            userDeletedSuccessfully = this._userService.DeleteUser(createdUser.Id);
+
+            // Act and Assert
+            Assert.IsFalse(userDeletedSuccessfully);
         }
 
     }
