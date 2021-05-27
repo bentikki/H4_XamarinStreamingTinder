@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Text;
 
 namespace StreaminTinderClassLibrary.Hashing
@@ -16,11 +15,11 @@ namespace StreaminTinderClassLibrary.Hashing
     /// </summary>
     public class HashingSettings
     {
-        [Required]
+
         public HashingMethodType HashingMethod { get; set; } 
-        [Required]
+
         public int SaltSize { get; set; }
-        [Required]
+
         public int NumberOfIterations { get; set; }
 
         /// <summary>

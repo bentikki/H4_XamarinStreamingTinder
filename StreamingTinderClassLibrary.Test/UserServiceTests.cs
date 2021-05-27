@@ -12,12 +12,12 @@ namespace StreamingTinderClassLibrary.Test
     {
 
 
-        private UserService _userService;
+        private IUserService _userService;
 
         [SetUp]
         public void SetUp()
         {
-            _userService = new UserService();
+            _userService = UserServiceFactory.GetUserService();
 
         }
 
@@ -51,6 +51,25 @@ namespace StreamingTinderClassLibrary.Test
         }
 
         [Test]
+        [TestCase(1)]
+        [TestCase(2)]
+        public void GetUserAsync_ExistingID_ShouldReturnIUser(int userID)
+        {
+            // Arrange
+            IUser user;
+
+            // Act
+            var userTask = this._userService.GetUserAsync(userID).Result;
+            user = userTask;
+
+            // Assert
+            Assert.IsNotNull(user);
+            Assert.IsNotEmpty(user.Username);
+            Assert.IsNotEmpty(user.Email);
+            Assert.Greater(user.Id, 0);
+        }
+
+        [Test]
         public void CreateNewUser_CreateNewUniqueUser_ShouldReturnIUser()
         {
             // Arrange
@@ -69,6 +88,9 @@ namespace StreamingTinderClassLibrary.Test
 
             // Act
             createdUser = this._userService.CreateNewUser(createUserToBe);
+
+            // Clean up
+            this._userService.DeleteUser(createdUser.Id);
 
             // Assert
             Assert.IsNotNull(createdUser);
@@ -238,6 +260,76 @@ namespace StreamingTinderClassLibrary.Test
             // Act and Assert
             Assert.NotNull(createdUser);
             Assert.NotNull(retrievedUser);
+        }
+
+        [Test]
+        public void LoginUser_ExistingUser_ShouldReturnTrueWithSatCurrentUser()
+        {
+            // Arrange
+            IUser createdUser;
+            IUser loggedInUser = null;
+            bool userLoginSuccess = false;
+            Random random = new Random();
+            string emailString = "testemail" + random.Next(0, 100000);
+            string passwordString = "password" + random.Next(0, 100000);
+
+            createdUser = new User()
+            {
+                Email = emailString,
+                Username = "testusername" + random.Next(0, 100000),
+                Password = passwordString
+            };
+
+            // Create test user
+            createdUser = this._userService.CreateNewUser(createdUser);
+
+            // Act
+            userLoginSuccess = this._userService.LoginUser(emailString, passwordString);
+
+            if(userLoginSuccess)
+                loggedInUser = this._userService.CurrentUser;
+
+            // Cleanup - delete test user
+            this._userService.DeleteUser(createdUser.Id);
+
+            // Act and Assert
+            Assert.IsTrue(userLoginSuccess);
+            Assert.NotNull(loggedInUser);
+        }
+
+        [Test]
+        public void LoginUser_ExistingUserWrongPassword_ShouldReturnFalseWithNullCurrentUser()
+        {
+            // Arrange
+            IUser createdUser;
+            IUser loggedInUser = null;
+            bool userLoginSuccess = false;
+            Random random = new Random();
+            string emailString = "testemail" + random.Next(0, 100000);
+            string passwordString = "password" + random.Next(0, 100000);
+
+            createdUser = new User()
+            {
+                Email = emailString,
+                Username = "testusername" + random.Next(0, 100000),
+                Password = passwordString
+            };
+
+            // Create test user
+            createdUser = this._userService.CreateNewUser(createdUser);
+
+            // Act
+            userLoginSuccess = this._userService.LoginUser(emailString, passwordString + "1");
+
+            if (userLoginSuccess)
+                loggedInUser = this._userService.CurrentUser;
+
+            // Cleanup - delete test user
+            this._userService.DeleteUser(createdUser.Id);
+
+            // Act and Assert
+            Assert.IsFalse(userLoginSuccess);
+            Assert.IsNull(loggedInUser);
         }
 
         [Test]

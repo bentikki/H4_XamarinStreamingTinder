@@ -4,7 +4,7 @@ using System.Text;
 
 namespace StreaminTinderClassLibrary.Users.Handlers
 {
-    interface IUserDAO
+    public interface IUserDAO
     {
         IUser Get(int id);
         IUser GetByString(string columnName, string value);

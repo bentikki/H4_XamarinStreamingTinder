@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
+using StreamingTinder.ViewModels;
 
 namespace StreamingTinder.Views
 {
@@ -10,6 +11,7 @@ namespace StreamingTinder.Views
         public AboutPage()
         {
             InitializeComponent();
+            NavigationPage.SetHasNavigationBar(this, false);
         }
     }
 }

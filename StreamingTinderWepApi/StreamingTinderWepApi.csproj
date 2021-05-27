@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\StreaminTinderClassLibrary\StreaminTinderClassLibrary.csproj" />
+    <ProjectReference Include="..\StreamingTinderClassLibrary\StreamingTinderClassLibrary.csproj" />
   </ItemGroup>
 
 

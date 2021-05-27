@@ -21,6 +21,7 @@ namespace StreamingTinderWepApi
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
+
                 });
     }
 }

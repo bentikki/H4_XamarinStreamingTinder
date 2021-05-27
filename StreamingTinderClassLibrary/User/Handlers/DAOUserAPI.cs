@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using StreaminTinderClassLibrary.Api;
+using StreaminTinderClassLibrary.Users.Handlers;
 using StreaminTinderClassLibrary.Users.Models;
 using System;
 using System.Collections.Generic;
@@ -9,11 +10,18 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace StreaminTinderClassLibrary.Users.Handlers
+namespace StreaminTinderClassLibrary.Users
 {
-    class DAOUserAPI : IUserDAO
+    public class DAOUserAPI : IUserDAO
     {
-        private ApiRequester apiRequester = new ApiRequester();
+        private ApiRequester apiRequester;
+        private string apiString;
+
+        public DAOUserAPI(string apidestination)
+        {
+            this.apiString = apidestination;
+            this.apiRequester = new ApiRequester(apidestination);
+        }
 
         public IUser Create(IUser user)
         {
@@ -35,7 +43,7 @@ namespace StreaminTinderClassLibrary.Users.Handlers
             var content = JsonConvert.SerializeObject(apiUser);
             HttpClient _client = new HttpClient();
 
-            var httpResponse = await _client.PostAsync("https://localhost:44346/api/users", new StringContent(content, Encoding.Default, "application/json"));
+            var httpResponse = await _client.PostAsync(this.apiString + "users", new StringContent(content, Encoding.Default, "application/json"));
 
             if (!httpResponse.IsSuccessStatusCode)
             {
@@ -111,7 +119,7 @@ namespace StreaminTinderClassLibrary.Users.Handlers
             var content = JsonConvert.SerializeObject(apiUser);
             HttpClient _client = new HttpClient();
 
-            var httpResponse = await _client.PostAsync("https://localhost:44346/api/users/verify", new StringContent(content, Encoding.Default, "application/json"));
+            var httpResponse = await _client.PostAsync(this.apiString + "users/verify", new StringContent(content, Encoding.Default, "application/json"));
 
             if (!httpResponse.IsSuccessStatusCode)
             {

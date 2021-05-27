@@ -30,13 +30,15 @@ namespace StreamingTinder.ViewModels
             [CallerMemberName] string propertyName = "",
             Action onChanged = null)
         {
-            if (EqualityComparer<T>.Default.Equals(backingStore, value))
-                return false;
-
             backingStore = value;
             onChanged?.Invoke();
             OnPropertyChanged(propertyName);
             return true;
+        }
+
+        protected async void ShowAlert(string alertString)
+        {
+            await App.Current.MainPage.DisplayAlert("Error", alertString, "OK");
         }
 
         #region INotifyPropertyChanged
