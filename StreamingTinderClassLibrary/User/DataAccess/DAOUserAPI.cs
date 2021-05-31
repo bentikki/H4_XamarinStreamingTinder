@@ -1,6 +1,5 @@
 ﻿using Newtonsoft.Json;
-using StreaminTinderClassLibrary.Api;
-using StreaminTinderClassLibrary.Users.Handlers;
+using StreamingTinderClassLibrary.Api;
 using StreaminTinderClassLibrary.Users.Models;
 using System;
 using System.Collections.Generic;
@@ -10,18 +9,11 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace StreaminTinderClassLibrary.Users
+namespace StreaminTinderClassLibrary.Users.DataAccess
 {
-    public class DAOUserAPI : IUserDAO
+    internal class DAOUserAPI : ApiDAOMaster, IUserDAO
     {
-        private ApiRequester apiRequester;
-        private string apiString;
-
-        public DAOUserAPI(string apidestination)
-        {
-            this.apiString = apidestination;
-            this.apiRequester = new ApiRequester(apidestination);
-        }
+        public DAOUserAPI(string apidestination) : base(apidestination) { }
 
         public IUser Create(IUser user)
         {
@@ -83,11 +75,6 @@ namespace StreaminTinderClassLibrary.Users
             }
 
             return user;
-        }
-
-        public IUser Update(IUser user)
-        {
-            throw new NotImplementedException();
         }
 
         public bool Delete(int id)

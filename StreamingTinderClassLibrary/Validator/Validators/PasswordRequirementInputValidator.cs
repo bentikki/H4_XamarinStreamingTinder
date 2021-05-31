@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using StreamingTinderClassLibrary.Validator.ValidationHandlers;
 
 namespace StreamingTinderClassLibrary.Validator.Validators
 {
     class PasswordRequirementInputValidator : InputValidatorHandler
     {
-        public override void Handle(object request)
+        public async override Task Handle(object request)
         {
             if (request is string)
             {

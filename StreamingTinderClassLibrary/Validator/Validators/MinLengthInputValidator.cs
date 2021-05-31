@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace StreamingTinderClassLibrary.Validator.Validators
 {
@@ -14,7 +15,7 @@ namespace StreamingTinderClassLibrary.Validator.Validators
             _stringLength = stringLength;
         }
 
-        public override void Handle(object request)
+        public async override Task Handle(object request)
         {
             if(request is string validateString)
             {

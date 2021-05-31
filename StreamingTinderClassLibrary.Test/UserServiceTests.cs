@@ -17,8 +17,7 @@ namespace StreamingTinderClassLibrary.Test
         [SetUp]
         public void SetUp()
         {
-            _userService = UserServiceFactory.GetUserService();
-
+            _userService = ServiceFactory.GetUserService();
         }
 
 
@@ -369,8 +368,8 @@ namespace StreamingTinderClassLibrary.Test
 
             createdUser = new User()
             {
-                Email = "testemail" + random.Next(0, 100000),
-                Username = "testusername" + random.Next(0, 100000),
+                Email = "DeleteUser_ExistingUser" + random.Next(0, 100000),
+                Username = "DeleteUser_ExistingUser" + random.Next(0, 100000),
                 Password = "password" + random.Next(0, 100000)
             };
 
@@ -394,8 +393,8 @@ namespace StreamingTinderClassLibrary.Test
 
             createdUser = new User()
             {
-                Email = "testemail" + random.Next(0, 100000),
-                Username = "testusername" + random.Next(0, 100000),
+                Email = "DeleteUser_NonExistingUser" + random.Next(0, 100000),
+                Username = "DeleteUser_NonExistingUser" + random.Next(0, 100000),
                 Password = "password" + random.Next(0, 100000)
             };
 
@@ -407,6 +406,118 @@ namespace StreamingTinderClassLibrary.Test
 
             // Act and Assert
             Assert.IsFalse(userDeletedSuccessfully);
+        }
+
+        [Test]
+        public void CurrentUser_NoUserLoggedIn_ShouldReturnNull()
+        {
+            // Arrange
+            IUser currentUser;
+
+            // Act
+            currentUser = this._userService.CurrentUser;
+
+            // Assert
+            Assert.IsNull(currentUser);
+        }
+
+        [Test]
+        public void CurrentUser_UserIsLoggedIn_ShouldReturnIUser()
+        {
+            // Arrange
+            IUser createdUser;
+            IUser currentUser;
+            bool deletedUserSuccess;
+            long randomNumber = new Random().Next(0, 10000);
+            string email = $"CurrentUser_UserIsLoggedIn{randomNumber}@email.com";
+            string password = "123456798!weqeAASD";
+            string username = $"CurrentUser_UserIsLoggedIn{randomNumber}";
+
+            createdUser = this._userService.CreateNewUserAsync(email, password, username).Result;
+
+            // Act
+            this._userService.LoginUser(email, password);
+
+            currentUser = this._userService.CurrentUser;
+
+            // Cleanup
+            deletedUserSuccess = this._userService.DeleteUser(createdUser.Id);
+
+            // Assert
+            Assert.IsNotNull(currentUser);
+            Assert.IsTrue(deletedUserSuccess);
+        }
+
+        [Test]
+        public void IsUserLoggedIn_UserIsNotLoggedIn_ShouldReturnFalse()
+        {
+            // Arrange
+            bool isUserLogedIn;
+
+            // Act
+            isUserLogedIn = this._userService.IsUserLoggedIn;
+
+            // Assert
+            Assert.IsFalse(isUserLogedIn);
+        }
+
+        [Test]
+        public void IsUserLoggedIn_UserIsLoggedIn_ShouldReturnTrue()
+        {
+            // Arrange
+            IUser createdUser;
+            bool deletedUserSuccess;
+            bool isUserLogedIn;
+            long randomNumber = new Random().Next(0, 10000);
+            string email = $"IsUserLoggedIn_UserIsLoggedIn{randomNumber}@email.com";
+            string password = "123456798!weqeAASD";
+            string username = $"IsUserLoggedIn_UserIsLoggedIn{randomNumber}";
+
+            createdUser = this._userService.CreateNewUserAsync(email, password, username).Result;
+
+            // Act
+            this._userService.LoginUser(email, password);
+
+            isUserLogedIn = this._userService.IsUserLoggedIn;
+
+            // Cleanup
+            deletedUserSuccess = this._userService.DeleteUser(createdUser.Id);
+
+            // Assert
+            Assert.IsTrue(isUserLogedIn);
+            Assert.IsTrue(deletedUserSuccess);
+        }
+
+
+        [Test]
+        public void LogoutUser_UserIsLoggedIn_ShouldReturnTrue()
+        {
+            // Arrange
+            IUser createdUser;
+            bool deletedUserSuccess;
+            bool isUserLogedInBefore;
+            bool isUserLogedOut;
+            bool isUserLogedInAfter;
+            long randomNumber = new Random().Next(0, 10000);
+            string email = $"LogoutUser_UserIsLoggedIn{randomNumber}@email.com";
+            string password = "123456798!weqeAASD";
+            string username = $"LogoutUser_UserIsLoggedIn{randomNumber}";
+
+            createdUser = this._userService.CreateNewUserAsync(email, password, username).Result;
+
+            // Act
+            this._userService.LoginUser(email, password); // Log in user
+            isUserLogedInBefore = this._userService.IsUserLoggedIn;
+            isUserLogedOut = this._userService.LogoutUser(); // Log out user
+            isUserLogedInAfter = this._userService.IsUserLoggedIn;
+
+            // Cleanup
+            deletedUserSuccess = this._userService.DeleteUser(createdUser.Id);
+
+            // Assert
+            Assert.IsTrue(isUserLogedInBefore);
+            Assert.IsTrue(isUserLogedOut);
+            Assert.IsFalse(isUserLogedInAfter);
         }
 
     }

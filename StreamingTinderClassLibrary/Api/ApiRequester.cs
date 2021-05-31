@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace StreaminTinderClassLibrary.Api
 {
-    class ApiRequester
+    public class ApiRequester
     {
         private readonly string API_PATH;
         private readonly int TIMEOUT_WAIT = 10000;

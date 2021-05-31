@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace StreamingTinderClassLibrary.Validator.ValidationHandlers
 {
@@ -31,11 +32,12 @@ namespace StreamingTinderClassLibrary.Validator.ValidationHandlers
         /// The client runs through every validation rule - to populate error list.
         /// </summary>
         /// <param name="inputObjectToValidate"></param>
-        public void Validate(object inputObjectToValidate)
+        public async Task Validate(object inputObjectToValidate)
         {
             foreach (IValidator validator in this._validators)
             {
-                validator.Handle(inputObjectToValidate, this._name);
+                await validator.Handle(inputObjectToValidate, this._name);
+
                 this._errors.AddRange(validator.ErrorList);
                 if (validator.StopValidation)
                     break;

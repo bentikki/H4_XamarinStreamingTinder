@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace StreamingTinderClassLibrary.Validator.ValidationHandlers
 {
@@ -8,7 +9,7 @@ namespace StreamingTinderClassLibrary.Validator.ValidationHandlers
     {
         List<string> ErrorList { get; }
         bool StopValidation { get; }
-        void Handle(object request, string name);
-        void Handle(object request);
+        Task Handle(object request, string name);
+        Task Handle(object request);
     }
 }

@@ -1,4 +1,5 @@
-﻿using StreamingTinder.Views;
+﻿using Acr.UserDialogs;
+using StreamingTinder.Views;
 using StreamingTinderClassLibrary.Validator;
 using StreaminTinderClassLibrary.Users;
 using System;
@@ -10,6 +11,8 @@ namespace StreamingTinder.ViewModels
 {
     public class AboutViewModel : BaseViewModel
     {
+        private readonly IUserService _userService;
+
         private string email;
         public string Email
         {
@@ -35,13 +38,14 @@ namespace StreamingTinder.ViewModels
         public ICommand ClickLoginButton { get; }
         public ICommand ClickCreateNewButton { get; }
 
-
-        public IUserService _userService = DependencyService.Get<IUserService>();
-
         public AboutViewModel()
         {
+            // Set dependencies.
+            this._userService = DependencyService.Get<IUserService>();
+
             // Check if user is logged in - Redirect if true
-            // TODO
+            if (this._userService.IsUserLoggedIn)
+                RedirectToMainPage();
 
             this.Title = "Couch Potato";
             ClickLoginButton = new Command(LoginButtonClicked);
@@ -53,57 +57,67 @@ namespace StreamingTinder.ViewModels
         /// </summary>
         public async void LoginButtonClicked()
         {
-            string[] emailErrors = DefaultValidator.ValidEmailLogin(this.Email);
-            string[] passwordErrors = DefaultValidator.ValidPassword(this.Password);
-
-            if (emailErrors.Length == 0 && passwordErrors.Length == 0)
+            using (UserDialogs.Instance.Loading("Validating..."))
             {
-                try
-                {
-                    // Login values are valid
-                    // Proceed to login validation
-                    bool loginSucceed = await this._userService.LoginUserAsync(this.Email, this.Password);
+                string[] emailErrors = DefaultValidator.ValidEmailLogin(this.Email);
+                string[] passwordErrors = DefaultValidator.ValidPassword(this.Password);
 
-                    if (loginSucceed)
+                if (emailErrors.Length == 0 && passwordErrors.Length == 0)
+                {
+                    using (UserDialogs.Instance.Loading("Logging in..."))
                     {
-                        // User login was successfull
-                        this.RedirectToMainPage();
+                        try
+                        {
+                            // Login values are valid
+                            // Proceed to login validation
+                            bool loginSucceed = await this._userService.LoginUserAsync(this.Email, this.Password);
 
+                            if (loginSucceed)
+                            {
+                                // User login was successfull
+                                // Save user data to local DB, for login after app shutdown.
+                                await App.LocalUserDatabase.SaveLocalUserDataAsync(new Models.UserLocal(Email, Password));
+
+                                // Redirect to main page
+                                this.RedirectToMainPage();
+
+                            }
+                            else
+                            {
+                                // User login was not successfull
+                                // Empty input fields and display error
+
+                                this.Email = "";
+                                this.Password = "";
+
+                                ShowAlert("Wrong email or password.");
+                            }
+                        }
+                        catch
+                        {
+                            ShowAlert("An unkown error occured. Please try again.");
+                        }
                     }
-                    else
+                }
+                else
+                {
+                    // Login values are not valid
+                    // Display error message
+                    string errorMessage = "An error occured during login" + System.Environment.NewLine;
+
+                    foreach (var error in emailErrors)
                     {
-                        // User login was not successfull
-                        // Empty input fields and display error
-
-                        this.Email = "";
-                        this.Password = "";
-
-                        ShowAlert("Wrong email or password.");
+                        errorMessage += System.Environment.NewLine + error;
                     }
-                }
-                catch
-                {
-                    ShowAlert("An unkown error occured. Please try again.");
-                }
+                    foreach (var error in passwordErrors)
+                    {
+                        errorMessage += System.Environment.NewLine + error;
+                    }
 
+                    ShowAlert(errorMessage);
+                }
             }
-            else
-            {
-                // Login values are not valid
-                // Display error message
-                string errorMessage = "An error occured during login" + System.Environment.NewLine;
-
-                foreach (var error in emailErrors)
-                {
-                    errorMessage += System.Environment.NewLine + error;
-                }
-                foreach (var error in passwordErrors)
-                {
-                    errorMessage += System.Environment.NewLine + error;
-                }
-
-                ShowAlert(errorMessage);
-            }
+            
 
         }
 
@@ -114,11 +128,6 @@ namespace StreamingTinder.ViewModels
         public async void CreateNewButtonClicked()
         {
             await Application.Current.MainPage.Navigation.PushModalAsync(new CreateAccountPage(), true);
-        }
-
-        private void RedirectToMainPage()
-        {
-            Application.Current.MainPage = new NavigationPage(new CreateAccountPage());
         }
 
     }

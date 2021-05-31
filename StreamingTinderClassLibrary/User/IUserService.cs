@@ -10,10 +10,13 @@ namespace StreaminTinderClassLibrary.Users
     {
         IUser GetUser(int id);
         IUser CurrentUser { get; }
+        bool IsUserLoggedIn { get; }
         Task<IUser> GetUserAsync(int id);
         IUser CreateNewUser(IUser user);
         Task<IUser> CreateNewUserAsync(IUser user);
         Task<IUser> CreateNewUserAsync(string email, string password, string username);
+        bool LogoutUser();
+        Task<bool> LogoutUserAsync();
         bool VerifyUser(IUser user);
         Task<bool> VerifyUserAsync(IUser user);
         bool VerifyUser(string username, string password);

@@ -5,6 +5,7 @@ using StreaminTinderClassLibrary.Users.Models;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace StreamingTinderClassLibrary.Test
 {
@@ -16,7 +17,7 @@ namespace StreamingTinderClassLibrary.Test
         [SetUp]
         public void SetUp()
         {
-            this.userService = UserServiceFactory.GetUserService();
+            this.userService = ServiceFactory.GetUserService();
         }
 
         [Test]
@@ -26,7 +27,7 @@ namespace StreamingTinderClassLibrary.Test
         [TestCase(">'123123")]
         [TestCase("105 OR 1=1")]
         [TestCase("\" or \"\" = \"")]
-        public void ValidEmail_InvalidValues_ShouldReturnErrorList(string validateString)
+        public void ValidEmailLogin_InvalidValues_ShouldReturnErrorList(string validateString)
         {
             // Arrange
             string testString = validateString;
@@ -40,7 +41,7 @@ namespace StreamingTinderClassLibrary.Test
         }
 
         [Test]
-        public void ValidEmail_LenghtOver_ShouldReturnErrorList()
+        public void ValidEmailLogin_LenghtOver_ShouldReturnErrorList()
         {
             // Arrange
             string testString = new String('a', 251);
@@ -54,7 +55,7 @@ namespace StreamingTinderClassLibrary.Test
         }
 
         [Test]
-        public void ValidEmail_LenghtUnder_ShouldReturnErrorList()
+        public void ValidEmailLogin_LenghtUnder_ShouldReturnErrorList()
         {
             // Arrange
             string testString = new String('a', 2);
@@ -69,7 +70,7 @@ namespace StreamingTinderClassLibrary.Test
 
         [Test]
         [TestCase("testemail@testemail.com")]
-        public void ValidEmail_ValidValues_ShouldReturnEmptyList(string validateString)
+        public void ValidEmailCreateNew_ValidValues_ShouldReturnEmptyList(string validateString)
         {
             // Arrange
             string testString = validateString;
@@ -81,9 +82,36 @@ namespace StreamingTinderClassLibrary.Test
             Assert.IsEmpty(errorList);
         }
 
+        [Test]
+        public async Task ValidEmailCreateNew_ExistingUser_ShouldReturnErrorListWithUniqueUserError()
+        {
+            // Arrange
+            IUser createdUser;
+            bool deletedUserSuccess;
+            long randomNumber = new Random().Next(0, 10000);
+            string email = $"ValidEmailCreateNewExistingUser{randomNumber}@email.com";
+            string password = "123456798!weqeAASD";
+            string username = $"ValidEmailCreateNewExistingUser{randomNumber}";
+
+            IUser createUser = new User(email, password, username);
+
+            createdUser = await this.userService.CreateNewUserAsync(createUser);
+
+            // Act
+            var errorList = await DefaultValidator.ValidEmailCreateNewAsync(email);
+
+            // Cleanup
+            deletedUserSuccess = await this.userService.DeleteUserAsync(createdUser.Id);
+
+            // Assert
+            Assert.IsNotNull(createdUser);
+            Assert.IsNotEmpty(errorList);
+            Assert.IsTrue(deletedUserSuccess);
+
+        }
 
         [Test]
-        public void ValidEmail_ExistingUser_ShouldReturnEmptyErrorList()
+        public void ValidEmailLogin_ExistingUser_ShouldReturnEmptyErrorList()
         {
             // Arrange
             Random random = new Random();

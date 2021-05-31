@@ -1,5 +1,7 @@
-﻿using StreamingTinder.Models;
+﻿using Acr.UserDialogs;
+using StreamingTinder.Models;
 using StreamingTinder.Services;
+using StreamingTinder.Views;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -38,7 +40,31 @@ namespace StreamingTinder.ViewModels
 
         protected async void ShowAlert(string alertString)
         {
-            await App.Current.MainPage.DisplayAlert("Error", alertString, "OK");
+
+            this.ShowAlert("Error", alertString);
+        }
+        protected async void ShowAlert(string alertHeading, string alertString)
+        {
+            AlertConfig config = new AlertConfig();
+            config.Title = alertHeading;
+            config.Message = alertString;
+            config.OkText = "Got it";
+
+            await UserDialogs.Instance.AlertAsync(config);
+            //await App.Current.MainPage.DisplayAlert(alertHeading, alertString, "OK");
+        }
+
+        protected void RedirectToMainPage()
+        {
+            //Application.Current.MainPage = new NavigationPage();
+            Application.Current.MainPage = new DashboardPage();
+        }
+
+        protected void RedirectToLoginPage()
+        {
+            //Application.Current.MainPage = new NavigationPage(new AboutPage());
+            Application.Current.MainPage = new AboutPage();
+
         }
 
         #region INotifyPropertyChanged

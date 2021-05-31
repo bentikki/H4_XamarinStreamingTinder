@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace StreamingTinderClassLibrary.Validator
 {
@@ -19,6 +20,11 @@ namespace StreamingTinderClassLibrary.Validator
         /// <returns>Returns string array with errors.</returns>
         static public string[] ValidEmailCreateNew(string email)
         {
+            return ValidEmailCreateNewAsync(email).Result;
+        }
+
+        static public async Task<string[]> ValidEmailCreateNewAsync(string email)
+        {
             List<IValidator> emailRules = new List<IValidator>()
             {
                 new NullInputValidator(),
@@ -31,8 +37,8 @@ namespace StreamingTinderClassLibrary.Validator
 
             var emailValidator = new ValidatorClient("Email", emailRules);
 
-            emailValidator.Validate(email);
-            
+            await emailValidator.Validate(email);
+
             return emailValidator.Errors.ToArray();
         }
 

@@ -1,9 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using StreamingTinderClassLibrary.StreamingService.Models;
 using StreamingTinderWepApi.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace StreamingTinderWepApi.Models
 {
@@ -15,5 +12,7 @@ namespace StreamingTinderWepApi.Models
         }
 
         public DbSet<User> Users { get; set; }
+        public DbSet<StreamingPlatformEntity> StreamingPlatforms { get; set; }
+        public DbSet<RoomEntity> Rooms { get; set; }
     }
 }

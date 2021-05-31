@@ -1,4 +1,5 @@
-﻿using StreamingTinder.Views;
+﻿using Acr.UserDialogs;
+using StreamingTinder.Views;
 using StreamingTinderClassLibrary.Validator;
 using StreaminTinderClassLibrary.Users;
 using System;
@@ -50,6 +51,10 @@ namespace StreamingTinder.ViewModels
 
         public CreateAccountViewModel()
         {
+            // Check if user is logged in - Redirect if true
+            if (this._userService.IsUserLoggedIn)
+                RedirectToMainPage();
+
             this.Title = "Create user";
 
             ClickCreateButton = new Command(CreateButtonClicked);
@@ -62,53 +67,58 @@ namespace StreamingTinder.ViewModels
         /// </summary>
         public async void CreateButtonClicked()
         {
-            // Run validation on input fields.
-            string[] emailErrors = DefaultValidator.ValidEmailCreateNew(this.Email);
-            string[] passwordErrors = DefaultValidator.ValidPassword(this.Password);
-            string[] usernameErrors = DefaultValidator.ValidUsername(this.Username);
-
-            // Check for errors
-            if(emailErrors.Length == 0 && passwordErrors.Length == 0 && usernameErrors.Length == 0)
+            using (UserDialogs.Instance.Loading("Creating user..."))
             {
-                // No errors
-                // Create user in database
-                try
-                {
-                    await this._userService.CreateNewUserAsync(Email, Password, Username);
+                // Run validation on input fields.
+                string[] emailErrors = await DefaultValidator.ValidEmailCreateNewAsync(this.Email);
+                string[] passwordErrors = DefaultValidator.ValidPassword(this.Password);
+                string[] usernameErrors = DefaultValidator.ValidUsername(this.Username);
 
-                    // Redirect to login page
-                    await Application.Current.MainPage.Navigation.PushModalAsync(new AboutPage(), true);
-                }
-                catch (Exception e)
+                // Check for errors
+                if (emailErrors.Length == 0 && passwordErrors.Length == 0 && usernameErrors.Length == 0)
                 {
-                    // An unexpected error occured, so user could not be created.
-                    // Show generic error message to user.
-                    ShowAlert("An error occured. User could not be created.");
+                    // No errors
+                    // Create user in database
+                    try
+                    {
+
+                        await this._userService.CreateNewUserAsync(Email, Password, Username);
+
+
+                        // Redirect to login page
+                        await Application.Current.MainPage.Navigation.PushModalAsync(new AboutPage(), true);
+                    }
+                    catch (Exception e)
+                    {
+                        // An unexpected error occured, so user could not be created.
+                        // Show generic error message to user.
+                        ShowAlert("An error occured. User could not be created.");
+                    }
+
                 }
-
-            }
-            else
-            {
-                // Errors in user input.
-                // Display errors.
-                string errorMessage = "Invalid user data:" + System.Environment.NewLine;
-
-                foreach (var error in emailErrors)
+                else
                 {
-                    errorMessage += System.Environment.NewLine + error;
-                }
-                foreach (var error in passwordErrors)
-                {
-                    errorMessage += System.Environment.NewLine + error;
-                }
-                foreach (var error in usernameErrors)
-                {
-                    errorMessage += System.Environment.NewLine + error;
-                }
+                    // Errors in user input.
+                    // Display errors.
+                    string errorMessage = "Invalid user data:" + System.Environment.NewLine;
 
-                ShowAlert(errorMessage);
+                    foreach (var error in emailErrors)
+                    {
+                        errorMessage += System.Environment.NewLine + error;
+                    }
+                    foreach (var error in passwordErrors)
+                    {
+                        errorMessage += System.Environment.NewLine + error;
+                    }
+                    foreach (var error in usernameErrors)
+                    {
+                        errorMessage += System.Environment.NewLine + error;
+                    }
 
-                // Color fields with errors.
+                    ShowAlert(errorMessage);
+
+                    // Color fields with errors.
+                }
             }
         }
 

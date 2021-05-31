@@ -1,6 +1,6 @@
 ﻿using StreamingTinderClassLibrary.Validator;
 using StreaminTinderClassLibrary.Hashing;
-using StreaminTinderClassLibrary.Users.Handlers;
+using StreaminTinderClassLibrary.Users.DataAccess;
 using StreaminTinderClassLibrary.Users.Models;
 using System;
 using System.Collections.Generic;
@@ -12,17 +12,24 @@ namespace StreaminTinderClassLibrary.Users
     /// <summary>
     /// Facade Service used to handle user CRUD
     /// </summary>
-    public class UserService : IUserService
+    internal class UserService : IUserService // Sat as interal to ensure only the factory can create a new instance.
     {
         private IUserDAO _userDAO;
         private HashingService _hashingService;
 
         public IUser CurrentUser { get; private set; }
-        public bool IsUserLoggedIn { get; private set; }
+        public bool IsUserLoggedIn {
+            private set { }
+            get
+            {
+                return this.CurrentUser != null;
+            }
+        }
 
         public UserService(IUserDAO userDAO)
         {
             this._userDAO = userDAO;
+            this.IsUserLoggedIn = false;
 
             // Setup hashing service.
             this._hashingService = new HashingService(new HashingSettings(HashingMethodType.SHA256));
@@ -153,6 +160,21 @@ namespace StreaminTinderClassLibrary.Users
         }
 
         /// <summary>
+        /// Log out current user functionality.
+        /// </summary>
+        /// <returns>Bool based on success - True: User is logged out, False: the user could not get logged out.</returns>
+        public bool LogoutUser()
+        {
+            bool logoutSuccess = false;
+
+            this.CurrentUser = null;
+
+            logoutSuccess = this.CurrentUser == null;
+
+            return logoutSuccess;
+        }
+
+        /// <summary>
         /// Returns user corrosponding to provided email string - if a user with corrosponding email exists.
         /// </summary>
         /// <param name="email">Email of needed user</param>
@@ -188,7 +210,6 @@ namespace StreaminTinderClassLibrary.Users
             return deletedUserSuccess;
         }
 
-
         /// <summary>
         /// Gets user by ID
         /// </summary>
@@ -216,6 +237,12 @@ namespace StreaminTinderClassLibrary.Users
         public async Task<bool> LoginUserAsync(string username, string password)
         {
             var task = Task.Run(() => this.LoginUser(username, password));
+            return await task;
+        }
+
+        public async Task<bool> LogoutUserAsync()
+        {
+            var task = Task.Run(() => this.LogoutUser());
             return await task;
         }
 
