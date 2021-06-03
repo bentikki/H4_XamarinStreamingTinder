@@ -4,6 +4,8 @@ using StreamingTinder.Models;
 using StreamingTinder.Services;
 using StreamingTinder.Views;
 using StreamingTinderClassLibrary;
+using StreamingTinderClassLibrary.Rooms;
+using StreamingTinderClassLibrary.StreamingService;
 using StreaminTinderClassLibrary.Users;
 using System;
 using System.Collections.Generic;
@@ -36,6 +38,8 @@ namespace StreamingTinder
             InitializeComponent();
 
             DependencyService.RegisterSingleton<StreaminTinderClassLibrary.Users.IUserService>(ServiceFactory.GetUserService());
+            DependencyService.RegisterSingleton<IStreamingPlatformService>(ServiceFactory.GetStreamingPlatformService());
+            DependencyService.RegisterSingleton<IRoomService>(ServiceFactory.GetRoomService());
 
             DependencyService.Register<MockDataStore>();
 

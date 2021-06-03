@@ -1,5 +1,6 @@
-﻿using StreamingTinderClassLibrary.Room;
-using StreamingTinderClassLibrary.Room.DataAccess;
+﻿
+using StreamingTinderClassLibrary.Rooms;
+using StreamingTinderClassLibrary.Rooms.DataAccess;
 using StreamingTinderClassLibrary.StreamingService;
 using StreamingTinderClassLibrary.StreamingService.DataAccess;
 using StreaminTinderClassLibrary.Users;
@@ -9,7 +10,8 @@ namespace StreamingTinderClassLibrary
 {
     public static class ServiceFactory
     {
-        private static string ApiKey { get; set; } = @"https://84c7c23a461f.ngrok.io" + @"/api/";
+        private static string ApiKey { get; set; } = @"https://4ed90f21bbec.ngrok.io" + @"/api/";
+        internal static byte RoomKeyLength { get; } = 12;
 
         public static IUserService GetUserService()
         {

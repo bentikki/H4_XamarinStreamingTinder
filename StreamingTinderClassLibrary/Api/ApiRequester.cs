@@ -37,11 +37,11 @@ namespace StreaminTinderClassLibrary.Api
             }
             catch (System.Net.Http.HttpRequestException e)
             {
-                throw new Exception("Could not connect to API. Site could not be reached", e);
+                throw new HttpRequestException("Could not connect to API. Site could not be reached", e);
             }
             catch (TaskCanceledException e)
             {
-                throw new Exception("Could not connect to API. The request timed out.", e);
+                throw new TaskCanceledException("Could not connect to API. The request timed out.", e);
             }
             catch (Exception e)
             {

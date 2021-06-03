@@ -1,5 +1,4 @@
 using NUnit.Framework;
-using StreamingTinderClassLibrary.Room;
 using StreamingTinderClassLibrary.StreamingService;
 using StreaminTinderClassLibrary.Authentication;
 using StreaminTinderClassLibrary.Hashing;

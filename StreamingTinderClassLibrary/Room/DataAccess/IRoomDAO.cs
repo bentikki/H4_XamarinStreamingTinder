@@ -10,5 +10,6 @@ namespace StreamingTinderClassLibrary.Rooms.DataAccess
         IRoom GetByRoomKey(string roomKey);
         IRoom Create(IRoom room);
         IRoom UpdateRoom(IRoom room);
+        bool ValidateRoomKey(string roomKey);
     }
 }

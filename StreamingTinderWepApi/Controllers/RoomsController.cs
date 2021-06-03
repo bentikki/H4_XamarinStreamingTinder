@@ -15,6 +15,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Data;
 using StreaminTinderClassLibrary.Hashing;
 using StreamingTinderClassLibrary.Rooms.Models;
+using StreaminTinderClassLibrary.Rooms.Models;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -26,6 +27,7 @@ namespace StreamingTinderWepApi.Controllers
     {
         private readonly StreaminTinderContext _context;
 
+
         public RoomsController(StreaminTinderContext context)
         {
             this._context = context;
@@ -33,93 +35,138 @@ namespace StreamingTinderWepApi.Controllers
 
         // GET: api/Users
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<User>>> Get()
+        public async Task<ActionResult<IEnumerable<RoomEntity>>> Get()
         {
-            return await _context.Users.ToListAsync();
+            return await _context.Rooms.ToListAsync();
         }
 
         // GET: api/Users/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<User>> Get(int id)
+        public async Task<ActionResult<ApiCreateRoom>> Get(int id)
         {
-            var movie = await _context.Users.FindAsync(id);
+            ApiCreateRoom apiCreateRoom = new ApiCreateRoom();
+            RoomEntity room = await _context.Rooms.FindAsync(id);
 
-            if (movie == null)
+            if (room == null)
             {
                 return NotFound();
             }
 
-            return movie;
-        }
-
-        [HttpGet("email/{value}")]
-        public async Task<ActionResult<User>> GetByEmail(string value)
-        {
-            var user = _context.Users.Where(x => x.Email == value).FirstOrDefault();
-
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            return user;
-        }
-
-        [HttpPost]
-        public async Task<ActionResult<User>> Post([FromBody] Room room)
-        {
-            User newlyCreatedUser;
-            int createdUserId = 0;
+            apiCreateRoom.Id = room.Id;
+            apiCreateRoom.Name = room.Name;
+            apiCreateRoom.RoomKey = room.RoomKey;
+            apiCreateRoom.Owner_FK_Users_Id = room.Owner_FK_Users_Id;
+            apiCreateRoom.StreamingPlatformIDs = new List<int>();
 
             using (SqlConnection con = new SqlConnection("Data Source=MSI\\SQLExpress;Initial Catalog=StreamingTinder;Integrated Security=SSPI;"))
             {
-                using (SqlCommand cmd = new SqlCommand("CreateNewUser", con))
+                using (SqlCommand cmd = new SqlCommand("SelectRoomServices", con))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
-
-                    cmd.Parameters.Add("@Username", SqlDbType.VarChar).Value = authUser.Username;
-                    cmd.Parameters.Add("@Email", SqlDbType.VarChar).Value = authUser.Email;
-                    cmd.Parameters.Add("@Password", SqlDbType.VarChar).Value = authUser.Password;
-                    cmd.Parameters.Add("@Salt", SqlDbType.VarChar).Value = authUser.Salt;
+                    cmd.Parameters.Add("@RoomID", SqlDbType.Int).Value = apiCreateRoom.Id;
 
                     con.Open();
-                    createdUserId = (int)cmd.ExecuteScalar();
+                    var reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        apiCreateRoom.StreamingPlatformIDs.Add(reader.GetInt32("Id"));
+                    }
                 }
+                
             }
 
-            newlyCreatedUser = _context.Users.FindAsync(createdUserId).Result;
-
-            return newlyCreatedUser;
+            return apiCreateRoom;
         }
 
-
-
-        // GET: api/Users/Delete/5
-        [HttpGet("Delete/{id}")]
-        public async Task<ActionResult<bool>> Delete(int id)
+        [HttpGet("key/{keyCode}")]
+        public async Task<ActionResult<ApiCreateRoom>> Get(string keyCode)
         {
-            var user = await _context.Users.FindAsync(id);
+            ApiCreateRoom apiCreateRoom = new ApiCreateRoom();
+            RoomEntity room = _context.Rooms.Where(x => x.RoomKey == keyCode).FirstOrDefault();
 
-            if (user != null)
+            if (room == null)
             {
+                return NotFound();
+            }
 
-                using (SqlConnection con = new SqlConnection("Data Source=MSI\\SQLExpress;Initial Catalog=StreamingTinder;Integrated Security=SSPI;"))
+            apiCreateRoom.Id = room.Id;
+            apiCreateRoom.Name = room.Name;
+            apiCreateRoom.RoomKey = room.RoomKey;
+            apiCreateRoom.Owner_FK_Users_Id = room.Owner_FK_Users_Id;
+            apiCreateRoom.StreamingPlatformIDs = new List<int>();
+
+            using (SqlConnection con = new SqlConnection("Data Source=MSI\\SQLExpress;Initial Catalog=StreamingTinder;Integrated Security=SSPI;"))
+            {
+                using (SqlCommand cmd = new SqlCommand("SelectRoomServices", con))
                 {
-                    using (SqlCommand cmd = new SqlCommand("DeleteUser", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.Add("@ID", SqlDbType.Int).Value = user.Id;
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.Add("@RoomID", SqlDbType.Int).Value = apiCreateRoom.Id;
 
-                        con.Open();
-                        cmd.ExecuteScalar();
+                    con.Open();
+                    var reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        apiCreateRoom.StreamingPlatformIDs.Add(reader.GetInt32("Id"));
                     }
                 }
 
-                return true;
             }
-            
-            return false;
+
+            return apiCreateRoom;
         }
 
+
+        [HttpPost]
+        public async Task<ActionResult<ApiCreateRoom>> Post([FromBody] ApiCreateRoom room)
+        {
+            ApiCreateRoom createdRoom = new ApiCreateRoom();
+            RoomEntity roomEntity = new RoomEntity();
+
+            roomEntity.Name = room.Name;
+            roomEntity.RoomKey = room.RoomKey;
+            roomEntity.Owner_FK_Users_Id = room.Owner_FK_Users_Id;
+
+            var createdRoomEntity = this._context.Rooms.Add(roomEntity).Entity;
+            this._context.SaveChanges();
+
+            using (SqlConnection con = new SqlConnection("Data Source=MSI\\SQLExpress;Initial Catalog=StreamingTinder;Integrated Security=SSPI;"))
+            {
+                foreach (var platformID in room.StreamingPlatformIDs)
+                {
+                    using (SqlCommand cmd = new SqlCommand("AddStreamingServiceToRoom", con))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.Add("@roomID", SqlDbType.Int).Value = createdRoomEntity.Id;
+                        cmd.Parameters.Add("@StreamingServiceID", SqlDbType.Int).Value = platformID;
+
+                        con.Open();
+                        cmd.ExecuteScalar();
+                        con.Close();
+                    }
+                }
+            }
+
+
+
+            createdRoom.Id = createdRoomEntity.Id;
+            createdRoom.Name = createdRoomEntity.Name;
+            createdRoom.RoomKey = createdRoomEntity.RoomKey;
+            createdRoom.Owner_FK_Users_Id = createdRoomEntity.Owner_FK_Users_Id;
+            createdRoom.StreamingPlatformIDs = room.StreamingPlatformIDs;
+
+            return createdRoom;
+        }
+
+        [HttpGet]
+        [Route("RoomKeyExists/{keyCode}")]
+        public async Task<ActionResult<bool>> RoomKeyExists(string keyCode)
+        {
+            RoomEntity matchingRoom = null;
+            matchingRoom = _context.Rooms.Where(x => x.RoomKey == keyCode).FirstOrDefault();
+
+            return matchingRoom != null;
+        }
     }
 }

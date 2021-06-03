@@ -15,6 +15,8 @@ namespace StreamingTinderClassLibrary.Rooms.Models
         public List<IUser> Members { get; set; }
         public List<IStreamingPlatform> StreamingServices { get; set; }
 
+        public Room() { }
+
         public Room(string name, IUser owner, string roomKey, List<IStreamingPlatform> streamingServices)
         {
             Name = name;

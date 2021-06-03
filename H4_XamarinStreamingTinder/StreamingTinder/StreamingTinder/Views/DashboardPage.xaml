@@ -33,12 +33,32 @@
         </StackLayout>
         <ScrollView Grid.Row="1">
             <StackLayout Orientation="Vertical" Padding="30,24,30,24" Spacing="20">
-                <Label Text="{Binding User.Username}"
-                       Padding="20,20,0,20"
-                       FontSize="Body"
+                <Label Text="Enter room:"
+                       Padding="0,20,0,0"
+                       FontSize="Large"
                        FontAttributes="Bold"/>
 
+                <Entry x:Name="RoomCode" Text="{Binding EnterRoomCode}" 
+                       Placeholder="Room key"   
+                       HeightRequest="50"
+                       Keyboard="Default"
+                       Margin="0,0,0,0" />
 
+                <Button Margin="0,0,0,50" 
+                        Text="Enter room"
+                        Command="{Binding EnterRoomButton}"
+                        BackgroundColor="{StaticResource Primary}"
+                        TextColor="White" />
+
+                
+                
+                
+                <Button Margin="0,10,0,0" 
+                        Text="Create new room"
+                        Command="{Binding CreateRoomButton}"
+                        BackgroundColor="{StaticResource Primary}"
+                        TextColor="White" />
+                
                 <Button Margin="0,10,0,0" 
                         Text="Log out"
                         Command="{Binding ClickLogoutButton}"
@@ -46,6 +66,7 @@
                         TextColor="White" />
             </StackLayout>
 
+            
 
         </ScrollView>
     </Grid>

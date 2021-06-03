@@ -8,7 +8,7 @@ namespace StreamingTinderClassLibrary.Rooms.KeyGenerator
     {
         public static IKeyGenerator GetKeyGenerator()
         {
-            return new SimpleKeyGenerator(12);
+            return new SimpleKeyGenerator(ServiceFactory.RoomKeyLength);
         }
     }
 }

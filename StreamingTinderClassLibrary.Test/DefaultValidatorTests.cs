@@ -168,6 +168,41 @@ namespace StreamingTinderClassLibrary.Test
             Assert.IsEmpty(errorList);
         }
 
+        [Test]
+        [TestCase(null)]
+        [TestCase("")]
+        [TestCase("    ")]
+        [TestCase(">'123123")]
+        [TestCase("105 OR 1=1")]
+        [TestCase("\" or \"\" = \"")]
+        public void ValidRoomName_InvalidValues_ShouldReturnErrorList(string validateString)
+        {
+            // Arrange
+            string testString = validateString;
 
+            // Act
+            var errorList = DefaultValidator.ValidRoomName(validateString);
+
+            // Assert
+            Assert.IsNotNull(errorList);
+            Assert.IsNotEmpty(errorList);
+        }
+
+        [Test]
+        [TestCase("ValidRoomName")]
+        [TestCase("Valid room name")]
+        [TestCase("My Room 123")]
+        [TestCase("Living Room - 1")]
+        public void ValidRoomName_ValidValues_ShouldReturnEmptyErrorList(string validateString)
+        {
+            // Arrange
+            string testString = validateString;
+
+            // Act
+            var errorList = DefaultValidator.ValidRoomName(validateString);
+
+            // Assert
+            Assert.IsEmpty(errorList);
+        }
     }
 }

@@ -1,0 +1,68 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="StreamingTinder.Views.RoomDetailsPage"
+             xmlns:vm="clr-namespace:StreamingTinder.ViewModels"
+             NavigationPage.HasNavigationBar="False">
+
+    <ContentPage.BindingContext>
+        <vm:RoomDetailsViewModel />
+    </ContentPage.BindingContext>
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <Color x:Key="Accent">#96d1ff</Color>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <StackLayout BackgroundColor="{StaticResource Accent}" VerticalOptions="FillAndExpand" HorizontalOptions="Fill">
+            <StackLayout Orientation="Horizontal" HorizontalOptions="Start" VerticalOptions="Start" Padding="40,5,0,5">
+                <ContentView VerticalOptions="FillAndExpand">
+                    <Image Source="xamarin_logo.png" VerticalOptions="Center" HeightRequest="64" />
+                </ContentView>
+                <Label Text="{Binding Title}"
+                       Padding="20,20,0,20"
+                       FontSize="Title"
+                       FontAttributes="Bold"/>
+            </StackLayout>
+        </StackLayout>
+        <ScrollView Grid.Row="1">
+            <StackLayout Orientation="Vertical" Padding="30,24,30,24" Spacing="10">
+                <Label Text="Streaming Services:"
+                       Padding="0,0,0,0"
+                       FontSize="Default"
+                       FontAttributes="Bold"/>
+
+                <CollectionView x:Name="MyCollection" ItemsSource="{Binding SelectedRoom.StreamingServices}"
+                                HeightRequest="20">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <StackLayout Orientation="Horizontal">
+                                <Label Text="{Binding Name}"/>
+                            </StackLayout>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+                <Label Text="Owner:"
+                       Padding="0,20,0,0"
+                       FontSize="Default"
+                       FontAttributes="Bold"/>
+                <Label Text="{Binding SelectedRoom.Owner.Username}" FontSize="Default" Padding="10,0,0,0" />
+                
+                <Label Text="Members:"
+                       Padding="0,20,0,0"
+                       FontSize="Default"
+                       FontAttributes="Bold"/>
+            </StackLayout>
+
+        </ScrollView>
+
+    </Grid>
+
+</ContentPage>
