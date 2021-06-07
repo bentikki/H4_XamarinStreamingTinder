@@ -117,15 +117,14 @@ namespace StreamingTinderClassLibrary.Validator
         /// <returns>Returns string array with errors.</returns>
         static public string[] ValidRoomName(string roomName)
         {
-            List<IValidator> roomNameRules = new List<IValidator>()
-            {
-                new NullInputValidator(),
-                new SqlInjectionInputValidator(),
-                new MaxLengthInputValidator(80),
-                new MinLengthInputValidator(5)
-            };
-
-            var validator = new ValidatorClient("Room name", roomNameRules);
+            ValidatorClient validator = new ValidatorClient("Room name",
+                new List<IValidator>()
+                {
+                    new NullInputValidator(),
+                    new SqlInjectionInputValidator(),
+                    new MaxLengthInputValidator(80),
+                    new MinLengthInputValidator(5)
+                });
 
             validator.Validate(roomName).Wait();
 
@@ -139,15 +138,15 @@ namespace StreamingTinderClassLibrary.Validator
         /// <returns>Returns string array with errors.</returns>
         static public string[] ValidRoomKey(string roomKey)
         {
-            List<IValidator> roomKeyRules = new List<IValidator>()
-            {
-                new NullInputValidator(),
-                new NoSpaceInputValidator(),
-                new SqlInjectionInputValidator(),
-                new ExactLengthInputValidator(ServiceFactory.RoomKeyLength)
-            };
 
-            var validator = new ValidatorClient("Room key", roomKeyRules);
+            ValidatorClient validator = new ValidatorClient("Room key",
+                new List<IValidator>()
+                {
+                    new NullInputValidator(),
+                    new NoSpaceInputValidator(),
+                    new SqlInjectionInputValidator(),
+                    new ExactLengthInputValidator(ServiceFactory.RoomKeyLength)
+                });
 
             validator.Validate(roomKey).Wait();
 
